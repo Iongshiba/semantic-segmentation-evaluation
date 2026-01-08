@@ -35,7 +35,7 @@ DATASET_CONFIG = {
 }
 
 WANDB_CONFIG = {
-    'project_name': 'semantic-segmentation',
+    'project_name': 'machine-learning-assignment',
     'entity': None,
 }
 
