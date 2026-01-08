@@ -132,7 +132,6 @@ class OxfordPetDataset(Dataset):
             return [xmin, ymin, xmax, ymax]
         return None
 
-
 def collate_fn(batch):
     images = []
     trimaps = []
@@ -154,7 +153,6 @@ def collate_fn(batch):
     masks = torch.stack(masks, dim=0)  # [B, H, W]
     
     return images, masks, trimaps, bboxes
-
 
 def get_oxford_pet_loader(root_dir, split='trainval', batch_size=32, 
                           image_size=224, num_workers=4, shuffle=None, seed=42):

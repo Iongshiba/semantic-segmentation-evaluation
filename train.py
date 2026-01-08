@@ -50,7 +50,6 @@ def train_unet_model(dl_loader, device):
     
     return unet
 
-
 def train_unet(model, train_loader, criterion, optimizer, device, epoch):
     model.train()
     total_loss = 0
@@ -71,7 +70,6 @@ def train_unet(model, train_loader, criterion, optimizer, device, epoch):
     avg_loss = total_loss / len(train_loader)
     wandb.log({'unet/train_loss': avg_loss, 'epoch': epoch})
     return avg_loss
-
 
 def evaluate_unet(model, loader, device):
     model.eval()
@@ -94,7 +92,6 @@ def evaluate_unet(model, loader, device):
     all_ground_truth = np.array(all_ground_truth)
     
     return compute_metrics(all_predictions, all_ground_truth)
-
 
 def save_unet_results(model, dataset, device, metrics_dict, output_base_dir=OUTPUT_DIR):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -144,7 +141,6 @@ def save_unet_results(model, dataset, device, metrics_dict, output_base_dir=OUTP
         json.dump(results_json, indent=2, fp=f)
     
     return output_dir
-
 
 def save_traditional_results(segmentor, results, feature_df, sample, metrics_dict, output_base_dir=OUTPUT_DIR):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -202,7 +198,6 @@ def save_traditional_results(segmentor, results, feature_df, sample, metrics_dic
         json.dump(results_json, indent=2, fp=f)
     
     return output_dir
-
 
 def train_traditional_models(trad_loader):
     feature_df = build_training_data(trad_loader, DATASET_CONFIG['pixels_per_image'])
@@ -269,12 +264,10 @@ def train_traditional_models(trad_loader):
     
     return models
 
-
 def evaluate_unet_model(unet, dl_loader, device):
     unet_metrics = evaluate_unet(unet, dl_loader, device)
     save_unet_results(unet, dl_loader, device, unet_metrics)
     return unet_metrics
-
 
 def evaluate_traditional_models(models):
     return {}
