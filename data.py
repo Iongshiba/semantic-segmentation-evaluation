@@ -5,7 +5,6 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-sys.path.append('/mnt/c/Users/Admin/Documents/long/document/dataset/Oxford_IIIT_Pet')
 
 from oxford_pet_loader import get_oxford_pet_loader
 from traditional.feature_extractor import FeatureExtractor
