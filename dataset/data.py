@@ -5,10 +5,11 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+# from data import loader
 from oxford_pet import get_oxford_pet_loader
 from traditional.feature_extractor import FeatureExtractor
 
-
+# for traditional method
 def build_training_data(loader, num_pixels):
     frames = []
     extractor = FeatureExtractor()
