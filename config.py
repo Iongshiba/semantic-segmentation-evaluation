@@ -33,7 +33,7 @@ RANDOM_FOREST_CONFIG = {
 }
 
 DATASET_CONFIG = {
-    'dataset_root': '/mnt/c/Users/Admin/Documents/long/document/dataset/Oxford_IIIT_Pet',
+    'dataset_root': './Oxford_IIIT_Pet',
     'train': 'trainval',
     'val': 'trainval',
     'test': 'test',
