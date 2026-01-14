@@ -34,12 +34,13 @@ class Down(nn.Module):
 
 
 class Up(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, dropout=0.0):
         super().__init__()
         self.upsample = nn.ConvTranspose2d(
             in_channels, out_channels, kernel_size=2, stride=2
         )
         self.double_conv = DoubleConv(in_channels, out_channels)
+        self.dropout = nn.Dropout2d(dropout) if dropout > 0 else None
 
     def forward(self, x_below, x_left):
         upsampled = self.upsample(x_below)
@@ -61,5 +62,7 @@ class Up(nn.Module):
         )
 
         concatenated = torch.cat([x_left, padded_upsampled], dim=1)
-
-        return self.double_conv(concatenated)
+        x = self.double_conv(concatenated)
+        if self.dropout is not None:
+            x = self.dropout(x)
+        return x

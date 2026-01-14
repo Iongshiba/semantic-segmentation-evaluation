@@ -4,7 +4,7 @@ from .unet import DoubleConv, Up, Down
 
 
 class UNet(nn.Module):
-    def __init__(self, n_channels, n_classes):
+    def __init__(self, n_channels, n_classes, dropout=0.3):
         super().__init__()
         self.downs = nn.ModuleList()
         self.ups = nn.ModuleList()
@@ -17,7 +17,7 @@ class UNet(nn.Module):
             self.downs.append(Down(enc_channels[i], enc_channels[i + 1]))
 
         for i in range(len(enc_channels) - 1, 0, -1):
-            self.ups.append(Up(enc_channels[i], enc_channels[i - 1]))
+            self.ups.append(Up(enc_channels[i], enc_channels[i - 1], dropout=dropout))
 
         # Final convolution
         self.final_conv = nn.Conv2d(enc_channels[0], n_classes, kernel_size=1)
