@@ -136,6 +136,8 @@ Edit `config.py` to customize:
 
 ## Outputs
 
+Model checkpoints of U-Net from the report can be found [https://drive.google.com/drive/folders/1raR_YBsJiNPFg182DXPcjswMOxP-pTvk?usp=sharing](https://drive.google.com/drive/folders/1raR_YBsJiNPFg182DXPcjswMOxP-pTvk?usp=sharing)
+
 Training outputs are saved to the `output/` directory:
 - Model checkpoints
 - Training metrics and logs
