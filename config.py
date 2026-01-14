@@ -1,11 +1,15 @@
 UNET_CONFIG = {
-    'learning_rate': 1e-4,
-    'batch_size': 8,
-    'epochs': 50,
-    'optimizer': 'adam',
-    'weight_decay': 1e-5,
+    'learning_rate': 1e-5,
+    'batch_size': 16,
+    'epochs': 500,
+    'optimizer': 'auto',
+    'weight_decay': 0,
     'in_channels': 3,
-    'n_classes': 3,
+    'n_classes': 2,
+    'checkpoint_freq': 5,
+    'dropout': 0.0,
+    'dice_weight': 0.0,
+    'class_weights': [1.0, 1.0],
 }
 
 KNN_CONFIG = {
@@ -18,7 +22,7 @@ SVM_CONFIG = {
     'kernel': 'rbf',
     'C': 1.0,
     'gamma': 'scale',
-    'probability': True,
+    'probability': False,
 }
 
 RANDOM_FOREST_CONFIG = {
@@ -29,9 +33,11 @@ RANDOM_FOREST_CONFIG = {
 }
 
 DATASET_CONFIG = {
-    'dataset_root': '/mnt/c/Users/Admin/Documents/long/document/dataset/Oxford_IIIT_Pet/annotations',
-    'split': 'trainval',
-    'pixels_per_image': 20000,
+    'dataset_root': '/mnt/c/Users/Admin/Documents/long/document/dataset/Oxford_IIIT_Pet',
+    'train': 'trainval',
+    'val': 'trainval',
+    'test': 'test',
+    'pixels_per_image': 25,
 }
 
 WANDB_CONFIG = {
@@ -40,3 +46,7 @@ WANDB_CONFIG = {
 }
 
 OUTPUT_DIR = './output'
+
+CHECKPOINT_CONFIG = {
+    'save_freq': 5,
+}
