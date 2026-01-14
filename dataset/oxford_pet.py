@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 
 from PIL import Image
 from pathlib import Path
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision import transforms
 import torchvision.transforms.functional as F
 
@@ -52,14 +52,14 @@ class OxfordPetDataset(Dataset):
         self.load_bbox = load_bbox
         
         if image_dir is None:
-            self.image_dir = self.root_dir.parent / 'images'
+            self.image_dir = self.root_dir / 'images'
         else:
             self.image_dir = Path(image_dir)
             
-        self.trimap_dir = self.root_dir / 'trimaps'
-        self.xml_dir = self.root_dir / 'xmls'
+        self.trimap_dir = self.root_dir / 'annotations' / 'trimaps'
+        self.xml_dir = self.root_dir / 'annotations' / 'xmls'
         
-        split_file = self.root_dir / f'{split}.txt'
+        split_file = self.root_dir / 'annotations' / f'{split}.txt'
         self.samples = []
         
         with open(split_file, 'r') as f:
@@ -96,6 +96,10 @@ class OxfordPetDataset(Dataset):
             'bbox': None,
         }
         
+        # Initialize trimap and mask to None
+        trimap = None
+        mask = None
+        
         if self.load_bbox:
             xml_path = self.xml_dir / f'{image_name}.xml'
             if xml_path.exists():
@@ -107,10 +111,11 @@ class OxfordPetDataset(Dataset):
             if trimap_path.exists():
                 trimap = Image.open(trimap_path)
                 trimap_array = np.array(trimap)
-                mask = (trimap_array == 1).astype(np.uint8)
+                mask = ((trimap_array == 1) | (trimap_array == 3)).astype(np.uint8)
         
-        if self.transform:
+        if self.transform and trimap is not None:
             image, mask, trimap = self.transform(image, mask, trimap)
+            mask = torch.clamp(mask, 0, 1)
         
         result['image'] = image
         result['trimap'] = trimap
@@ -155,38 +160,66 @@ def collate_fn(batch):
     return images, masks, trimaps, bboxes
 
 def get_oxford_pet_loader(root_dir, split='trainval', batch_size=32, 
-                          image_size=224, num_workers=4, shuffle=None, seed=42):
+                          image_size=224, num_workers=4, shuffle=None, normalize=False, seed=42):
     # Set random seeds for reproducibility
     if seed is not None:
         torch.manual_seed(seed)
         np.random.seed(seed)
-    
+
     # Default shuffle behavior
     if shuffle is None:
         shuffle = (split == 'trainval')
-    
-    transform = JointTransform(size=(image_size, image_size), normalize=True)
-    
-    dataset = OxfordPetDataset(
-        root_dir=root_dir,
-        split=split,
-        transform=transform
-    )
     
     # Create DataLoader with reproducible shuffling
     generator = None
     if seed is not None and shuffle:
         generator = torch.Generator()
         generator.manual_seed(seed)
+
+    transform = JointTransform(size=(image_size, image_size), normalize=normalize)
     
-    loader = DataLoader(
-        dataset,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        num_workers=num_workers,
-        pin_memory=True,
-        generator=generator,
-        collate_fn=collate_fn
+    dataset = OxfordPetDataset(
+        root_dir=root_dir,
+        split=split,
+        transform=transform
     )
-    
-    return loader
+
+    if split == 'trainval':
+        train_size = int(0.8 * len(dataset))
+        val_size = len(dataset) - train_size
+        train_set, val_set = random_split(
+            dataset,
+            [train_size, val_size],
+            generator=torch.Generator().manual_seed(42)
+        )
+        train_loader = DataLoader(
+            train_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=True,
+            generator=generator,
+            collate_fn=collate_fn
+        )
+        val_loader = DataLoader(
+            val_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=True,
+            generator=generator,
+            collate_fn=collate_fn
+        )
+        return train_loader, val_loader
+    else:
+        test_set = dataset
+        loader = DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
+            pin_memory=True,
+            generator=generator,
+            collate_fn=collate_fn
+        )
+        return loader
